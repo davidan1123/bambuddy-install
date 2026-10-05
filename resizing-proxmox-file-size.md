@@ -2,6 +2,8 @@
 
 Commands to resize the volume group and filesystem:
 
+sudo growpart /dev/sda 3
+sudo pvresize /dev/sda3
 ## Step 1
 sudo lvextend -r -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
 
