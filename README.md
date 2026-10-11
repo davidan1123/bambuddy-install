@@ -10,7 +10,9 @@ This is a modified version of the Bambu Buddy Docker installation script for our
 ## Installation:
 ```bash
 # Download and run
-wget https://raw.githubusercontent.com/davidan1123/bambuddy-install/main/docker-install.sh
+sudo usermod -aG docker $USER
+git clone https://github.com/davidan1123/bambuddy-install.git
+cd bambuddy-install
 chmod +x docker-install.sh
 sudo ./docker-install.sh
 ```
