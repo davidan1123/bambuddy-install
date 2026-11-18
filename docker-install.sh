@@ -38,6 +38,16 @@ mkdir -p $INSTALL_PATH
 echo "Downloading docker-compose.yml..."
 wget -O $INSTALL_PATH/docker-compose.yml https://raw.githubusercontent.com/davidan1123/bambuddy-install/main/docker-compose.yml
 
+# Settings (NAS IP, DB password) live in .env, which is never committed
+if [ ! -f "$INSTALL_PATH/.env" ]; then
+    wget -O $INSTALL_PATH/.env https://raw.githubusercontent.com/davidan1123/bambuddy-install/main/.env.example
+    chmod 600 $INSTALL_PATH/.env
+    echo ""
+    echo "Created $INSTALL_PATH/.env from .env.example."
+    echo "Edit it (NAS_IP, DB_PASSWORD, DB_PORT, ...) and run this script again."
+    exit 0
+fi
+
 # Start Bambu Buddy
 echo "Starting Bambu Buddy..."
 cd $INSTALL_PATH
