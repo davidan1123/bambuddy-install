@@ -6,9 +6,8 @@
 # this one. Copy .env.example to .env and fill it in; .env is not committed.
 #
 # Before first start:
-#   1. On the VM:       curl -fsSL https://get.docker.com | sudo sh
-#                       (Docker Engine + "docker compose" plugin)
-#                       sudo apt install nfs-common
+#   1. On the VM:       sudo apt install docker.io docker-compose nfs-common
+#                       (Docker Compose v1: the "docker-compose" command)
 #   2. On the Synology: create <NFS_PATH>/{data,logs,backups} and an NFS
 #                       permission rule for this VM's IP (sys, Squash "No mapping",
 #                       "allow users to access mounted subfolders" ticked)
@@ -17,7 +16,7 @@
 #
 # Deploy from the VM's shell (not as a Portainer stack, because the agent
 # would be restarting itself):
-#   sudo docker compose up -d
+#   sudo docker-compose up -d
 #
 # If this VM already runs a Portainer Agent (e.g. from gitea-install),
 # delete the portainer_agent service below — only one agent per Docker host.
