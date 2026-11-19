@@ -1,47 +1,49 @@
-# Bambu Buddy Docker Installation (Homelab Modified)
+# Bambuddy Docker Installation (Homelab)
 
-This is a modified version of the Bambu Buddy Docker installation script for our homelab environment.
+Bambuddy on a Proxmox Docker VM, with all data on a Synology NAS:
 
-## Modifications Made:
-- Added Docker Compose v1 compatibility (the original script expects v2)
-- Fixed container creation for legacy Docker environments
-- Optimized for our Proxmox cluster setup
+- Data, logs and backups → Synology over NFS
+- Database → PostgreSQL running on the Synology
+- Portainer Agent (port 9001) so a Portainer server can manage this host
 
-## Installation:
+## Prerequisites
+1. On the VM, install Docker Engine with the Compose plugin, and the NFS client:
+   ```bash
+   curl -fsSL https://get.docker.com | sudo sh
+   sudo apt install nfs-common
+   docker compose version   # should print v2.x
+   ```
+2. On the Synology:
+   - Create the folders `data`, `logs` and `backups` under `NFS_PATH`
+     (default `/volume1/docker/bambuddy`).
+   - NFS permission rule on the share for the VM's IP: Read/Write, Security `sys`,
+     Squash "No mapping", "Allow users to access mounted subfolders" ticked.
+3. In PostgreSQL (pgAdmin Query Tool):
+   ```sql
+   CREATE USER bambuddy WITH PASSWORD '...';
+   CREATE DATABASE bambuddy OWNER bambuddy;
+   ```
+
+## Install
 ```bash
-# Download and run
-sudo usermod -aG docker $USER
-git clone https://github.com/davidan1123/bambuddy-install.git
+git clone https://github.com/davidan1123/bambuddy-install.git bambuddy-install
 cd bambuddy-install
-chmod +x docker-install.sh
-sudo ./docker-install.sh
-```
-
-## Configuration (.env)
-The compose file keeps all data on a Synology NAS: Bambuddy's folders over NFS
-and its database in PostgreSQL on the NAS. A Portainer Agent (port 9001) is
-included so a Portainer server can manage this host.
-
-Site-specific settings are read from a `.env` file that is **not** committed:
-```bash
 cp .env.example .env
 chmod 600 .env
-nano .env   # set NAS_IP, NFS_PATH, DB_PASSWORD, DB_PORT, ...
+nano .env        # NAS_IP, DB_PASSWORD, DB_PORT, PORT
+sudo docker compose up -d
+sudo docker logs bambuddy --tail 30
 ```
-`DB_PASSWORD` must be URL-encoded (`@` → `%40`, `!` → `%21`).
 
-Prerequisites:
-- `sudo apt install nfs-common` on the VM
-- On the NAS: `data`, `logs`, `backups` folders under `NFS_PATH`, and an NFS
-  permission rule for the VM's IP (Security `sys`, Squash "No mapping",
-  "Allow users to access mounted subfolders" ticked)
-- In PostgreSQL:
-  ```sql
-  CREATE USER bambuddy WITH PASSWORD '...';
-  CREATE DATABASE bambuddy OWNER bambuddy;
-  ```
+Open `http://<vm-ip>:8000` (or the `PORT` you set in `.env`).
 
-## Notes:
-- Works with Docker Compose v1 (docker-compose command)
-- Tested on Ubuntu 24.04 with Docker 24.x
-- Container runs in host networking mode for printer discovery
+## Notes
+- `DB_PASSWORD` must be URL-encoded (`@` → `%40`, `!` → `%21`), because it goes
+  into Bambuddy's `DATABASE_URL` (unlike Gitea's plain password).
+- The container uses host networking so printer discovery (SSDP multicast) and
+  camera streaming work; Bambuddy's ports are the VM's ports.
+- Only one Portainer Agent per Docker host: if this VM already runs one,
+  remove the `portainer_agent` service from `docker-compose.yml`.
+- Deploy from the shell, not as a Portainer stack (the agent would restart itself).
+- Growing the VM's disk after resizing it in Proxmox: see
+  [resizing-proxmox-file-size.md](resizing-proxmox-file-size.md).
