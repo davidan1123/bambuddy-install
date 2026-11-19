@@ -7,9 +7,11 @@ Bambuddy on a Proxmox Docker VM, with all data on a Synology NAS:
 - Portainer Agent (port 9001) so a Portainer server can manage this host
 
 ## Prerequisites
-1. On the VM:
+1. On the VM, install Docker Engine with the Compose plugin, and the NFS client:
    ```bash
+   curl -fsSL https://get.docker.com | sudo sh
    sudo apt install nfs-common
+   docker compose version   # should print v2.x
    ```
 2. On the Synology:
    - Create the folders `data`, `logs` and `backups` under `NFS_PATH`
