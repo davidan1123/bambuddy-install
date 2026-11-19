@@ -1,14 +1,14 @@
 # Bambuddy + Portainer Agent on a Proxmox Docker VM.
-# Files live on a Synology NAS (NFS, mounted by Docker).
+# Data, logs and backups live on a Synology NAS (NFS, mounted by Docker).
 # The database lives in PostgreSQL running on the Synology.
 #
-# Settings (NAS IP, database password, ...) come from a .env file next to
+# Settings (NAS IP, database password, port, ...) come from a .env file next to
 # this one. Copy .env.example to .env and fill it in; .env is not committed.
 #
 # Before first start:
 #   1. On the VM:       sudo apt install nfs-common
 #   2. On the Synology: create <NFS_PATH>/{data,logs,backups} and an NFS
-#                       permission rule for this VM's IP (sys, no mapping,
+#                       permission rule for this VM's IP (sys, Squash "No mapping",
 #                       "allow users to access mounted subfolders" ticked)
 #   3. In pgAdmin:      CREATE USER bambuddy WITH PASSWORD '...';
 #                       CREATE DATABASE bambuddy OWNER bambuddy;
@@ -16,6 +16,9 @@
 # Deploy from the VM's shell (not as a Portainer stack, because the agent
 # would be restarting itself):
 #   sudo docker compose up -d
+#
+# If this VM already runs a Portainer Agent (e.g. from gitea-install),
+# delete the portainer_agent service below — only one agent per Docker host.
 
 services:
   bambuddy:
